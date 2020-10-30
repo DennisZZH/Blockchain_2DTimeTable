@@ -7,8 +7,8 @@
 #include <queue>
 #include <thread>
 #include <mutex>
-#include <parameters.h>
-#include "Msg.pb.h"
+#include "parameters.h"
+//#include "Msg.pb.h"
 
 typedef struct {
     uint32_t sender_id;
@@ -19,7 +19,7 @@ typedef struct {
 class client {
 
 public:
-    client(uint32_t client_id);
+    client(uint32_t cid);
     ~client();
 
     uint32_t get_client_id() {return client_id;};
@@ -43,12 +43,12 @@ private:
     float balance_table[MAX_CLIENT_SIZE];
     uint32_t timetable[TIME_TABLE_SIZE];
     uint32_t clocktime;
-    std::queue<application_msg_t> msg_buffer;
+    //std::queue<application_msg_t> msg_buffer;
 
     int set_up_connection();
     int garbage_collect();
 
-    // Mutexs
+    // Mutexes
     std::mutex clocktime_mutex;
     std::mutex timetable_mutex;
     std::mutex balance_table_mutex;

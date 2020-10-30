@@ -175,22 +175,6 @@ class application_msg_t :
 
   // accessors -------------------------------------------------------
 
-  enum : int {
-    kTypeFieldNumber = 1,
-  };
-  // required int32 type = 1;
-  bool has_type() const;
-  private:
-  bool _internal_has_type() const;
-  public:
-  void clear_type();
-  ::PROTOBUF_NAMESPACE_ID::int32 type() const;
-  void set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_type() const;
-  void _internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:application_msg_t)
  private:
   class _Internal;
@@ -198,7 +182,6 @@ class application_msg_t :
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::int32 type_;
   friend struct ::TableStruct_Msg_2eproto;
 };
 // ===================================================================
@@ -211,34 +194,6 @@ class application_msg_t :
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
 // application_msg_t
-
-// required int32 type = 1;
-inline bool application_msg_t::_internal_has_type() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool application_msg_t::has_type() const {
-  return _internal_has_type();
-}
-inline void application_msg_t::clear_type() {
-  type_ = 0;
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 application_msg_t::_internal_type() const {
-  return type_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 application_msg_t::type() const {
-  // @@protoc_insertion_point(field_get:application_msg_t.type)
-  return _internal_type();
-}
-inline void application_msg_t::_internal_set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000001u;
-  type_ = value;
-}
-inline void application_msg_t::set_type(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:application_msg_t.type)
-}
 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
