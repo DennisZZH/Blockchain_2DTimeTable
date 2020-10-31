@@ -78,10 +78,26 @@ void client::increase_clocktime() {
     clocktime_mutex.lock();
     clocktime++;
     clocktime_mutex.unlock();
-}                                
+}
+
+void client::add_to_blockchain(transaction_t &trans) {
+    blockchain_mutex.lock();
+    blockchain.push_back(trans);
+    blockchain_mutex.unlock();
+}
 
 int client::transfer_money(uint32_t rid, float amt) {
-    // TODO
+    if (rid != client_id) {
+        return ILLEGAL_SENDER_ERROR;
+    }
+    if (get_balance(client_id) < amt) {
+        return INSUFFICIENT_BALANCE_ERROR;
+    }
+    increase_clocktime();
+    transaction_t newtrans = transaction_t(client_id, rid, amt);
+    add_to_blockchain(newtrans);
+    set_balance(client_id, get_balance(client_id) - amt);
+    set_timetable(client_id, client_id, clocktime);
     return 0;
 }
 
@@ -91,8 +107,7 @@ int client::send_application(uint32_t rid) {
 }
 
 float client::check_balance(uint32_t cid) {
-    // TODO
-    return 0.0;
+   return get_balance(cid);
 }
 
 int client::set_up_connection() {
