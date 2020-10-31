@@ -10,7 +10,9 @@
  *  Communication related parameters
  */
 #define CLIENT_IP           "127.0.0.1"
-#define BASE_PORT           8000
+#define SERVER_BASE_PORT    8000
+#define CLIENT_BASE_PORT    8010
+#define CLIENT_NUM_MAX      3
 
 /** @Insufficient balance error flag.
 * Client throw this flag when user trying to send an amt greater than its balance
