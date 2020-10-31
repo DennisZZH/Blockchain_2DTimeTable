@@ -48,39 +48,49 @@ client::~client() {
     close(sockfd_tcp);
 }
 
-float client::get_balance(uint32_t client_id) {
-    // TODO
-    return 0.0;
+float client::get_balance(uint32_t cid) {
+    balance_table_mutex.lock();
+    float curr_balance = balance_table[cid];
+    balance_table_mutex.unlock();
+    return curr_balance;
 }
 
 u_int32_t client::get_timetable(uint32_t j, uint32_t k) {
-    // TODO
-    return 0;
+    timetable_mutex.lock();
+    u_int32_t curr_t = timetable[MAX_CLIENT_SIZE * j + k];
+    timetable_mutex.unlock();
+    return curr_t;
 }
 
-void client::set_balance(uint32_t client_id, float amt) {
-    // TODO
+void client::set_balance(uint32_t cid, float amt) {
+    balance_table_mutex.lock();
+    balance_table[cid] = amt;
+    balance_table_mutex.unlock();
 }
 
-void client::set_timetable(uint32_t j, uint32_t k, uint32_t time) {
-    // TODO
+void client::set_timetable(uint32_t j, uint32_t k, uint32_t t) {
+    timetable_mutex.lock();
+    timetable[MAX_CLIENT_SIZE * j + k] = t;
+    timetable_mutex.unlock();
 }
 
 void client::increase_clocktime() {
-    // TODO
+    clocktime_mutex.lock();
+    clocktime++;
+    clocktime_mutex.unlock();
 }                                
 
-int client::transfer_money(uint32_t recver_id, float amt) {
+int client::transfer_money(uint32_t rid, float amt) {
     // TODO
     return 0;
 }
 
-int client::send_application(uint32_t recver_id) {
+int client::send_application(uint32_t rid) {
     // TODO
     return 0;
 }
 
-float client::check_balance(uint32_t client_id) {
+float client::check_balance(uint32_t cid) {
     // TODO
     return 0.0;
 }

@@ -22,18 +22,15 @@ public:
     client(uint32_t cid);
     ~client();
 
+    // Getter functions
     uint32_t get_client_id() {return client_id;};
-    float get_balance(uint32_t client_id);
+    float get_balance(uint32_t cid);
     u_int32_t get_timetable(uint32_t j, uint32_t k);
     uint32_t get_clocktime() {return clocktime;};
 
-    void set_balance(uint32_t client_id, float amt);
-    void set_timetable(uint32_t j, uint32_t k, uint32_t time);
-    void increase_clocktime();                                          // Increase its own clocktime by one
-
-    int transfer_money(uint32_t recver_id, float amt);
-    int send_application(uint32_t recver_id);
-    float check_balance(uint32_t client_id);
+    int transfer_money(uint32_t rid, float amt);
+    int send_application(uint32_t rid);
+    float check_balance(uint32_t cid);
 
 private:
     uint32_t client_id;
@@ -45,6 +42,11 @@ private:
     uint32_t clocktime;
     //std::queue<application_msg_t> msg_buffer;
 
+    // Setter functions
+    void set_balance(uint32_t cid, float amt);
+    void set_timetable(uint32_t j, uint32_t k, uint32_t t);
+    void increase_clocktime();               // Increase its own clocktime by 1
+    
     int set_up_connection();
     int garbage_collect();
 
