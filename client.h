@@ -1,5 +1,5 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef __CLIENT_H__
+#define __CLIENT_H__
 
 #include <cstdlib>
 #include <iostream>
@@ -21,6 +21,12 @@ struct transaction_t{
     }
 };
 
+struct client_info_t {
+    int socket;
+    bool valid;
+    std::thread task;
+};
+
 class client {
 
 public:
@@ -37,11 +43,15 @@ private:
     uint32_t client_id;
     int port_id;
     int sockfd_tcp;
+    client_info_t clients_connected[MAX_CLIENT_SIZE] = {0};
+
+    uint32_t clocktime;
+    uint32_t timetable[TIME_TABLE_SIZE];
     std::list<transaction_t> blockchain;
     float balance_table[MAX_CLIENT_SIZE];
-    uint32_t timetable[TIME_TABLE_SIZE];
-    uint32_t clocktime;
     //std::queue<application_msg_t> msg_buffer;
+
+    bool stop_flag = false;
 
     // Thread safe Getter helper functions
     float get_balance(uint32_t cid);
@@ -54,8 +64,9 @@ private:
     void increase_clocktime();               // Increase its own clocktime by 1
     void add_to_blockchain(transaction_t &trans);   // Add a transaction to blockchain
     
-    int set_up_connection();
     int garbage_collect();
+    int setup_server();                    // Setup the socket and ready to accept socket.
+    
 
     // Mutexes
     std::mutex clocktime_mutex;
@@ -64,12 +75,16 @@ private:
     std::mutex blockchain_mutex;
 
     // Threads
-    std::thread recv_thread;                 // Thread for listening & recving application from peers
-    std::thread proc_thread;                 // Thread for precessing recved application from peers                              
+    std::thread conn_thread;                    // Thread for connecting to the other two peers.
+    std::thread wait_thread;                    // Thread for listening & accepting connections from peers.
+    std::thread recv_thread;                    // Thread for listening & recving application from peers
+    std::thread proc_thread;                    // Thread for precessing recved application from peers                              
 
     // Thread Tasks
-    void recv_application();                // Thread function for recving applications from peers
-    void proc_application();                // Thread functon for processing applications recved from peers
+    void setup_connections();               // Setup the connections to connect to other clients.
+    void wait_connections();                    // Thread function for listening & accepting connections. 
+    void proc_application();                    // Thread functon for processing applications recved from peers
+    void recv_application(int index);           // Thread function for recving applications from peers. Index is used for freeing the client slot.
 };
 
 #endif
