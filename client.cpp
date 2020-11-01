@@ -109,6 +109,10 @@ int client::transfer_money(uint32_t rid, float amt) {
 
 int client::send_application(uint32_t rid) {
     // TODO
+    // Piggyback Timetable
+    // Piggyback all transactions t such that Timetable[k, node(t)] < time(t)
+    // Include all the info and create a application_msg_t
+    // Send out the application
     return 0;
 }
 
@@ -196,11 +200,6 @@ void client::setup_connections() {
     std::cerr << "[setup_connections] Exited." << std::endl;
 }
 
-int client::garbage_collect() {
-    // TODO
-    return 0;
-}
-
 void client::wait_connections() {
     while (!stop_flag) {
         sockaddr_in peer_addr = {0};
@@ -250,5 +249,19 @@ void client::recv_application(int id) {
 }
 
 void client::proc_application() {
+    // Pop an application from msg_buffer
+
+    // Get the Timetable and transactions from that application
+
+    // Incorporate all new transactions into local blockchain
+
+    // Update Timetable so that, (1) Max of all elemets (2) Max of clocktimes in local ith row and remote kth row
+
+    // Garbage collect local blockchain from any records corresponding to transaction t such that
+    // For all sites j, Timetable[j, node(t)] >= time(t)
+}
+
+int client::garbage_collect() {
     // TODO
+    return 0;
 }
