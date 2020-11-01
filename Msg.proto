@@ -1,5 +1,14 @@
 syntax = "proto2";
 
+message transaction_msg_t {
+	required uint32 sender_id = 1;
+	required uint32 recver_id = 2;
+	required float amt = 3;
+	required uint32 clock = 4;
+}
+
 message application_msg_t {
-	// TODO
+	required int32 sender_id = 1;
+	required string timetable = 2;
+	repeated transaction_msg_t log = 3;
 }

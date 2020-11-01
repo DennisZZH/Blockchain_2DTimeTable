@@ -14,10 +14,12 @@ struct transaction_t{
     uint32_t sender_id;
     uint32_t recver_id;
     float amt;
-    transaction_t(uint32_t sid, uint32_t rid, float amount) {
+    uint32_t clock;
+    transaction_t(uint32_t sid, uint32_t rid, float amount, uint32_t t) {
         sender_id = sid;
         recver_id = rid;
         amt = amount;
+        clock = t;
     }
 };
 
