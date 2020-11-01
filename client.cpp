@@ -3,8 +3,12 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <vector>
+#include <list>
+#include <queue>
+#include <algorithm>
 #include "client.h"
-//#include "Msg.pb.h"
+#include "Msg.pb.h"
 #include "parameters.h"
 #include "utility.h"
 
@@ -68,6 +72,33 @@ u_int32_t client::get_timetable(uint32_t j, uint32_t k) {
     return curr_t;
 }
 
+std::string client::get_timetable_str(){
+    std::string timetable_str = "";
+    timetable_mutex.lock();
+    for (int i = 0; i < TIME_TABLE_SIZE; i++) {
+        timetable_str += timetable[i];
+    }
+    timetable_mutex.unlock();
+    return timetable_str;
+}
+
+void client::get_transactions(uint32_t target_clock, std::vector<transaction_t> &log) {
+    // Get all transactions t such that Timetable[k, node(t)] < time(t)
+    for (auto it = blockchain.begin(); it != blockchain.end(); it++) {
+        if (it->clock > target_clock) {
+            log.push_back(*it);
+        }
+    }
+}
+
+application_msg_t client::pop_msg_buffer() {
+    msg_buffer_mutex.lock();
+    application_msg_t tmp = msg_buffer.front();
+    msg_buffer.pop();
+    msg_buffer_mutex.unlock();
+    return tmp;
+}
+
 void client::set_balance(uint32_t cid, float amt) {
     balance_table_mutex.lock();
     balance_table[cid] = amt;
@@ -92,6 +123,12 @@ void client::add_to_blockchain(transaction_t &trans) {
     blockchain_mutex.unlock();
 }
 
+void client::push_msg_buffer(application_msg_t app_msg) {
+    msg_buffer_mutex.lock();
+    msg_buffer.push(app_msg);
+    msg_buffer_mutex.unlock();
+}
+
 int client::transfer_money(uint32_t rid, float amt) {
     if (rid != client_id) {
         return ILLEGAL_SENDER_ERROR;
@@ -100,7 +137,7 @@ int client::transfer_money(uint32_t rid, float amt) {
         return INSUFFICIENT_BALANCE_ERROR;
     }
     increase_clocktime();
-    transaction_t newtrans = transaction_t(client_id, rid, amt);
+    transaction_t newtrans = transaction_t(client_id, rid, amt, get_clocktime());
     add_to_blockchain(newtrans);
     set_balance(client_id, get_balance(client_id) - amt);
     set_timetable(client_id, client_id, clocktime);
@@ -108,11 +145,26 @@ int client::transfer_money(uint32_t rid, float amt) {
 }
 
 int client::send_application(uint32_t rid) {
-    // TODO
-    // Piggyback Timetable
+    // Piggyback Timetable into a string
+    std::string timetable_str = get_timetable_str();
     // Piggyback all transactions t such that Timetable[k, node(t)] < time(t)
+    std::vector<transaction_t> trans_log;
+    uint32_t target_clock = get_timetable(rid, client_id);
+    get_transactions(target_clock, trans_log);
     // Include all the info and create a application_msg_t
+    application_msg_t new_application;
+    transaction_msg_t* tran_ptr;
+    new_application.set_sender_id(rid);
+    new_application.set_timetable_str(timetable_str);
+    for (auto t : trans_log) {
+        tran_ptr = new_application.add_log();
+        tran_ptr->set_sender_id(t.sender_id);
+        tran_ptr->set_recver_id(t.recver_id);
+        tran_ptr->set_amt(t.amt);
+        tran_ptr->set_clock(t.clock);
+    }
     // Send out the application
+    // TODO
     return 0;
 }
 
@@ -229,6 +281,10 @@ void client::wait_connections() {
 }
 
 void client::recv_application(int id) {
+    // Keep listening to peers 
+    // Recv an application_msg_t
+    // Push it into msg_buffer
+    // Note: use Thread Safe method push_msg_buffer() to push into msg_buffer
     // TODO
     uint8_t buffer[4096] = {0};
     while (!stop_flag) {
@@ -249,16 +305,38 @@ void client::recv_application(int id) {
 }
 
 void client::proc_application() {
-    // Pop an application from msg_buffer
-
-    // Get the Timetable and transactions from that application
-
-    // Incorporate all new transactions into local blockchain
-
-    // Update Timetable so that, (1) Max of all elemets (2) Max of clocktimes in local ith row and remote kth row
-
-    // Garbage collect local blockchain from any records corresponding to transaction t such that
-    // For all sites j, Timetable[j, node(t)] >= time(t)
+    while (!stop_flag) {
+        // Pop an application from msg_buffer
+        application_msg_t curr_application = pop_msg_buffer();
+        // Get the Timetable and transactions from that application
+        uint32_t sid = curr_application.sender_id();
+        std::string timetable_str = curr_application.timetable_str();
+        uint32_t timetable_recv[TIME_TABLE_SIZE];
+        for (int i = 0; i < TIME_TABLE_SIZE; i++) {
+            timetable_recv[i] = timetable_str[i] - '0';
+        }
+        std::vector<transaction_t> trans_log;
+        for (int i = 0; i < curr_application.log_size(); i++) {
+            const transaction_msg_t& tran_msg = curr_application.log(i);
+            trans_log.push_back(transaction_t(tran_msg.sender_id(), tran_msg.recver_id(), tran_msg.amt(), tran_msg.clock()));
+        }
+        // Incorporate all new transactions into local blockchain
+        for (auto t : trans_log) {
+            add_to_blockchain(t);
+        }
+        // Update Timetable so that, (1) Max of all elemets (2) Max of clocktimes in local ith row and remote kth row
+        for (int row = 0; row < MAX_CLIENT_SIZE; row++) {
+            for (int col = 0; col < MAX_CLIENT_SIZE; col++) {
+                if (row == client_id) {
+                    set_timetable(row, col, std::max(get_timetable(row, col), timetable_recv[sid * MAX_CLIENT_SIZE + col]));
+                }
+                set_timetable(row, col, std::max(get_timetable(row, col), timetable_recv[row * MAX_CLIENT_SIZE + col]));
+            }
+        }
+        // Garbage collect local blockchain from any records corresponding to transaction t such that
+        // For all sites j, Timetable[j, node(t)] >= time(t)
+        garbage_collect();
+    }
 }
 
 int client::garbage_collect() {

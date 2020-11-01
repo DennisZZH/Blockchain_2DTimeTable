@@ -9,6 +9,6 @@ message transaction_msg_t {
 
 message application_msg_t {
 	required int32 sender_id = 1;
-	required string timetable = 2;
+	required string timetable_str = 2;
 	repeated transaction_msg_t log = 3;
 }

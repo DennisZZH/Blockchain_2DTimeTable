@@ -5,10 +5,11 @@
 #include <iostream>
 #include <list>
 #include <queue>
+#include <vector>
 #include <thread>
 #include <mutex>
 #include "parameters.h"
-//#include "Msg.pb.h"
+#include "Msg.pb.h"
 
 struct transaction_t{
     uint32_t sender_id;
@@ -51,21 +52,25 @@ private:
     uint32_t timetable[TIME_TABLE_SIZE];
     std::list<transaction_t> blockchain;
     float balance_table[MAX_CLIENT_SIZE];
-    //std::queue<application_msg_t> msg_buffer;
+    std::queue<application_msg_t> msg_buffer;
 
     bool stop_flag = false;
 
     // Thread safe Getter helper functions
     float get_balance(uint32_t cid);
     u_int32_t get_timetable(uint32_t j, uint32_t k);
+    std::string get_timetable_str();
     uint32_t get_clocktime() {return clocktime;};
+    void get_transactions(uint32_t target_clock, std::vector<transaction_t> &log);  // Get qualified transactions
+    application_msg_t pop_msg_buffer();
 
     // Thread safe Setter helper functions
     void set_balance(uint32_t cid, float amt);
     void set_timetable(uint32_t j, uint32_t k, uint32_t t);
-    void increase_clocktime();               // Increase its own clocktime by 1
-    void add_to_blockchain(transaction_t &trans);   // Add a transaction to blockchain
-    
+    void increase_clocktime();                          // Increase its own clocktime by 1
+    void add_to_blockchain(transaction_t &trans);       // Add a transaction to blockchain
+    void push_msg_buffer(application_msg_t app_msg);    // Push a application msg to msg_buffer
+
     int garbage_collect();
     int setup_server();                    // Setup the socket and ready to accept socket.
     
@@ -75,6 +80,7 @@ private:
     std::mutex timetable_mutex;
     std::mutex balance_table_mutex;
     std::mutex blockchain_mutex;
+    std::mutex msg_buffer_mutex;
 
     // Threads
     std::thread conn_thread;                    // Thread for connecting to the other two peers.
