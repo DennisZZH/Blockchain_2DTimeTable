@@ -340,6 +340,19 @@ void client::proc_application() {
 }
 
 int client::garbage_collect() {
-    // TODO
+    for (auto it = blockchain.begin(); it != blockchain.end(); it++) {
+        uint32_t sid = it->sender_id;
+        uint32_t clock = it->clock;
+        bool flag = true;
+        for (int i = 0; i < MAX_CLIENT_SIZE; i++) {
+            if (get_timetable(i, sid) < clock) {
+                flag = false;
+                break;
+            }  
+        }
+        if (flag) {
+            blockchain.erase(it);
+        }
+    }
     return 0;
 }
