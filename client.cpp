@@ -93,7 +93,7 @@ void client::get_transactions(uint32_t target_clock, std::vector<transaction_t> 
 
 application_msg_t client::pop_msg_buffer() {
     msg_buffer_mutex.lock();
-    application_msg_t tmp = msg_buffer.front();
+    application_msg_t tmp = msg_buffer.front();        
     msg_buffer.pop();
     msg_buffer_mutex.unlock();
     return tmp;
@@ -111,7 +111,7 @@ void client::set_timetable(uint32_t j, uint32_t k, uint32_t t) {
     timetable_mutex.unlock();
 }
 
-void client::increase_clocktime() {
+void client::increase_clocktime() {                                     // REVIEW: Should also increase timetable? Double check 132
     clocktime_mutex.lock();
     clocktime++;
     clocktime_mutex.unlock();
@@ -164,7 +164,7 @@ int client::send_application(uint32_t rid) {
         tran_ptr->set_clock(t.clock);
     }
     // Send out the application
-    // TODO
+    // TODO:
     return 0;
 }
 
@@ -285,7 +285,7 @@ void client::recv_application(int id) {
     // Recv an application_msg_t
     // Push it into msg_buffer
     // Note: use Thread Safe method push_msg_buffer() to push into msg_buffer
-    // TODO
+    // TODO:
     uint8_t buffer[4096] = {0};
     while (!stop_flag) {
         // Receive logic here.
@@ -307,28 +307,35 @@ void client::recv_application(int id) {
 void client::proc_application() {
     while (!stop_flag) {
         // Pop an application from msg_buffer
+        // TODO: Check empty.
         application_msg_t curr_application = pop_msg_buffer();
+
         // Get the Timetable and transactions from that application
         uint32_t sid = curr_application.sender_id();
         std::string timetable_str = curr_application.timetable_str();
         uint32_t timetable_recv[TIME_TABLE_SIZE];
         for (int i = 0; i < TIME_TABLE_SIZE; i++) {
-            timetable_recv[i] = timetable_str[i] - '0';
+            // str: 1050                                                    // TODO:  Fix.
+            timetable_recv[i] = timetable_str[i] - '0';                     // REVIEW: Timetable string [i] - '0'. Always valid?
         }
+        
+        // Parse the transactions_log
         std::vector<transaction_t> trans_log;
-        for (int i = 0; i < curr_application.log_size(); i++) {
+        for (int i = 0; i < curr_application.log_size(); i++) {             // REVIEW: Logsize 
             const transaction_msg_t& tran_msg = curr_application.log(i);
             trans_log.push_back(transaction_t(tran_msg.sender_id(), tran_msg.recver_id(), tran_msg.amt(), tran_msg.clock()));
         }
         // Incorporate all new transactions into local blockchain
-        for (auto t : trans_log) {
-            add_to_blockchain(t);
+        for (auto t : trans_log) {                                          // TODO:    Compare with timetable. Qualified transactions to blockchain.
+                                                                            // TODO:    Update local balance table.
+            add_to_blockchain(t);                                           // REVIEW:  Why add directly? What if the sender doesn't know that you already know, and send the same thing again?
         }
+
         // Update Timetable so that, (1) Max of all elemets (2) Max of clocktimes in local ith row and remote kth row
         for (int row = 0; row < MAX_CLIENT_SIZE; row++) {
             for (int col = 0; col < MAX_CLIENT_SIZE; col++) {
                 if (row == client_id) {
-                    set_timetable(row, col, std::max(get_timetable(row, col), timetable_recv[sid * MAX_CLIENT_SIZE + col]));
+                    set_timetable(row, col, std::max(get_timetable(row, col), timetable_recv[sid * MAX_CLIENT_SIZE + col]));    // REVIEW: Double Check.
                 }
                 set_timetable(row, col, std::max(get_timetable(row, col), timetable_recv[row * MAX_CLIENT_SIZE + col]));
             }
