@@ -47,7 +47,7 @@ struct TableStruct_Msg_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[2]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[3]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -57,11 +57,15 @@ extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table
 class application_msg_t;
 class application_msg_tDefaultTypeInternal;
 extern application_msg_tDefaultTypeInternal _application_msg_t_default_instance_;
+class timetable_msg_t;
+class timetable_msg_tDefaultTypeInternal;
+extern timetable_msg_tDefaultTypeInternal _timetable_msg_t_default_instance_;
 class transaction_msg_t;
 class transaction_msg_tDefaultTypeInternal;
 extern transaction_msg_tDefaultTypeInternal _transaction_msg_t_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
 template<> ::application_msg_t* Arena::CreateMaybeMessage<::application_msg_t>(Arena*);
+template<> ::timetable_msg_t* Arena::CreateMaybeMessage<::timetable_msg_t>(Arena*);
 template<> ::transaction_msg_t* Arena::CreateMaybeMessage<::transaction_msg_t>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 
@@ -264,6 +268,163 @@ class transaction_msg_t PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class timetable_msg_t PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:timetable_msg_t) */ {
+ public:
+  inline timetable_msg_t() : timetable_msg_t(nullptr) {}
+  virtual ~timetable_msg_t();
+
+  timetable_msg_t(const timetable_msg_t& from);
+  timetable_msg_t(timetable_msg_t&& from) noexcept
+    : timetable_msg_t() {
+    *this = ::std::move(from);
+  }
+
+  inline timetable_msg_t& operator=(const timetable_msg_t& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline timetable_msg_t& operator=(timetable_msg_t&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet& unknown_fields() const {
+    return _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance);
+  }
+  inline ::PROTOBUF_NAMESPACE_ID::UnknownFieldSet* mutable_unknown_fields() {
+    return _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const timetable_msg_t& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const timetable_msg_t* internal_default_instance() {
+    return reinterpret_cast<const timetable_msg_t*>(
+               &_timetable_msg_t_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(timetable_msg_t& a, timetable_msg_t& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(timetable_msg_t* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(timetable_msg_t* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline timetable_msg_t* New() const final {
+    return CreateMaybeMessage<timetable_msg_t>(nullptr);
+  }
+
+  timetable_msg_t* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<timetable_msg_t>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const timetable_msg_t& from);
+  void MergeFrom(const timetable_msg_t& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(timetable_msg_t* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "timetable_msg_t";
+  }
+  protected:
+  explicit timetable_msg_t(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_Msg_2eproto);
+    return ::descriptor_table_Msg_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTimeFieldNumber = 1,
+  };
+  // repeated uint32 time = 1;
+  int time_size() const;
+  private:
+  int _internal_time_size() const;
+  public:
+  void clear_time();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_time(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
+      _internal_time() const;
+  void _internal_add_time(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
+      _internal_mutable_time();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::uint32 time(int index) const;
+  void set_time(int index, ::PROTOBUF_NAMESPACE_ID::uint32 value);
+  void add_time(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
+      time() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
+      mutable_time();
+
+  // @@protoc_insertion_point(class_scope:timetable_msg_t)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 > time_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_Msg_2eproto;
+};
+// -------------------------------------------------------------------
+
 class application_msg_t PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:application_msg_t) */ {
  public:
@@ -313,7 +474,7 @@ class application_msg_t PROTOBUF_FINAL :
                &_application_msg_t_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    2;
 
   friend void swap(application_msg_t& a, application_msg_t& b) {
     a.Swap(&b);
@@ -385,7 +546,7 @@ class application_msg_t PROTOBUF_FINAL :
 
   enum : int {
     kLogFieldNumber = 3,
-    kTimetableStrFieldNumber = 2,
+    kTimetableFieldNumber = 2,
     kSenderIdFieldNumber = 1,
   };
   // repeated .transaction_msg_t log = 3;
@@ -406,25 +567,23 @@ class application_msg_t PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::transaction_msg_t >&
       log() const;
 
-  // required string timetable_str = 2;
-  bool has_timetable_str() const;
+  // required .timetable_msg_t timetable = 2;
+  bool has_timetable() const;
   private:
-  bool _internal_has_timetable_str() const;
+  bool _internal_has_timetable() const;
   public:
-  void clear_timetable_str();
-  const std::string& timetable_str() const;
-  void set_timetable_str(const std::string& value);
-  void set_timetable_str(std::string&& value);
-  void set_timetable_str(const char* value);
-  void set_timetable_str(const char* value, size_t size);
-  std::string* mutable_timetable_str();
-  std::string* release_timetable_str();
-  void set_allocated_timetable_str(std::string* timetable_str);
+  void clear_timetable();
+  const ::timetable_msg_t& timetable() const;
+  ::timetable_msg_t* release_timetable();
+  ::timetable_msg_t* mutable_timetable();
+  void set_allocated_timetable(::timetable_msg_t* timetable);
   private:
-  const std::string& _internal_timetable_str() const;
-  void _internal_set_timetable_str(const std::string& value);
-  std::string* _internal_mutable_timetable_str();
+  const ::timetable_msg_t& _internal_timetable() const;
+  ::timetable_msg_t* _internal_mutable_timetable();
   public:
+  void unsafe_arena_set_allocated_timetable(
+      ::timetable_msg_t* timetable);
+  ::timetable_msg_t* unsafe_arena_release_timetable();
 
   // required int32 sender_id = 1;
   bool has_sender_id() const;
@@ -452,7 +611,7 @@ class application_msg_t PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::transaction_msg_t > log_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr timetable_str_;
+  ::timetable_msg_t* timetable_;
   ::PROTOBUF_NAMESPACE_ID::int32 sender_id_;
   friend struct ::TableStruct_Msg_2eproto;
 };
@@ -581,6 +740,57 @@ inline void transaction_msg_t::set_clock(::PROTOBUF_NAMESPACE_ID::uint32 value) 
 
 // -------------------------------------------------------------------
 
+// timetable_msg_t
+
+// repeated uint32 time = 1;
+inline int timetable_msg_t::_internal_time_size() const {
+  return time_.size();
+}
+inline int timetable_msg_t::time_size() const {
+  return _internal_time_size();
+}
+inline void timetable_msg_t::clear_time() {
+  time_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 timetable_msg_t::_internal_time(int index) const {
+  return time_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 timetable_msg_t::time(int index) const {
+  // @@protoc_insertion_point(field_get:timetable_msg_t.time)
+  return _internal_time(index);
+}
+inline void timetable_msg_t::set_time(int index, ::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  time_.Set(index, value);
+  // @@protoc_insertion_point(field_set:timetable_msg_t.time)
+}
+inline void timetable_msg_t::_internal_add_time(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  time_.Add(value);
+}
+inline void timetable_msg_t::add_time(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_add_time(value);
+  // @@protoc_insertion_point(field_add:timetable_msg_t.time)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
+timetable_msg_t::_internal_time() const {
+  return time_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >&
+timetable_msg_t::time() const {
+  // @@protoc_insertion_point(field_list:timetable_msg_t.time)
+  return _internal_time();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
+timetable_msg_t::_internal_mutable_time() {
+  return &time_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint32 >*
+timetable_msg_t::mutable_time() {
+  // @@protoc_insertion_point(field_mutable_list:timetable_msg_t.time)
+  return _internal_mutable_time();
+}
+
+// -------------------------------------------------------------------
+
 // application_msg_t
 
 // required int32 sender_id = 1;
@@ -611,78 +821,87 @@ inline void application_msg_t::set_sender_id(::PROTOBUF_NAMESPACE_ID::int32 valu
   // @@protoc_insertion_point(field_set:application_msg_t.sender_id)
 }
 
-// required string timetable_str = 2;
-inline bool application_msg_t::_internal_has_timetable_str() const {
+// required .timetable_msg_t timetable = 2;
+inline bool application_msg_t::_internal_has_timetable() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  PROTOBUF_ASSUME(!value || timetable_ != nullptr);
   return value;
 }
-inline bool application_msg_t::has_timetable_str() const {
-  return _internal_has_timetable_str();
+inline bool application_msg_t::has_timetable() const {
+  return _internal_has_timetable();
 }
-inline void application_msg_t::clear_timetable_str() {
-  timetable_str_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline void application_msg_t::clear_timetable() {
+  if (timetable_ != nullptr) timetable_->Clear();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& application_msg_t::timetable_str() const {
-  // @@protoc_insertion_point(field_get:application_msg_t.timetable_str)
-  return _internal_timetable_str();
+inline const ::timetable_msg_t& application_msg_t::_internal_timetable() const {
+  const ::timetable_msg_t* p = timetable_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::timetable_msg_t*>(
+      &::_timetable_msg_t_default_instance_);
 }
-inline void application_msg_t::set_timetable_str(const std::string& value) {
-  _internal_set_timetable_str(value);
-  // @@protoc_insertion_point(field_set:application_msg_t.timetable_str)
+inline const ::timetable_msg_t& application_msg_t::timetable() const {
+  // @@protoc_insertion_point(field_get:application_msg_t.timetable)
+  return _internal_timetable();
 }
-inline std::string* application_msg_t::mutable_timetable_str() {
-  // @@protoc_insertion_point(field_mutable:application_msg_t.timetable_str)
-  return _internal_mutable_timetable_str();
-}
-inline const std::string& application_msg_t::_internal_timetable_str() const {
-  return timetable_str_.Get();
-}
-inline void application_msg_t::_internal_set_timetable_str(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  timetable_str_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void application_msg_t::set_timetable_str(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  timetable_str_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:application_msg_t.timetable_str)
-}
-inline void application_msg_t::set_timetable_str(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  timetable_str_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:application_msg_t.timetable_str)
-}
-inline void application_msg_t::set_timetable_str(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  timetable_str_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:application_msg_t.timetable_str)
-}
-inline std::string* application_msg_t::_internal_mutable_timetable_str() {
-  _has_bits_[0] |= 0x00000001u;
-  return timetable_str_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* application_msg_t::release_timetable_str() {
-  // @@protoc_insertion_point(field_release:application_msg_t.timetable_str)
-  if (!_internal_has_timetable_str()) {
-    return nullptr;
+inline void application_msg_t::unsafe_arena_set_allocated_timetable(
+    ::timetable_msg_t* timetable) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(timetable_);
   }
-  _has_bits_[0] &= ~0x00000001u;
-  return timetable_str_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void application_msg_t::set_allocated_timetable_str(std::string* timetable_str) {
-  if (timetable_str != nullptr) {
+  timetable_ = timetable;
+  if (timetable) {
     _has_bits_[0] |= 0x00000001u;
   } else {
     _has_bits_[0] &= ~0x00000001u;
   }
-  timetable_str_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), timetable_str,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:application_msg_t.timetable_str)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:application_msg_t.timetable)
+}
+inline ::timetable_msg_t* application_msg_t::release_timetable() {
+  _has_bits_[0] &= ~0x00000001u;
+  ::timetable_msg_t* temp = timetable_;
+  timetable_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::timetable_msg_t* application_msg_t::unsafe_arena_release_timetable() {
+  // @@protoc_insertion_point(field_release:application_msg_t.timetable)
+  _has_bits_[0] &= ~0x00000001u;
+  ::timetable_msg_t* temp = timetable_;
+  timetable_ = nullptr;
+  return temp;
+}
+inline ::timetable_msg_t* application_msg_t::_internal_mutable_timetable() {
+  _has_bits_[0] |= 0x00000001u;
+  if (timetable_ == nullptr) {
+    auto* p = CreateMaybeMessage<::timetable_msg_t>(GetArena());
+    timetable_ = p;
+  }
+  return timetable_;
+}
+inline ::timetable_msg_t* application_msg_t::mutable_timetable() {
+  // @@protoc_insertion_point(field_mutable:application_msg_t.timetable)
+  return _internal_mutable_timetable();
+}
+inline void application_msg_t::set_allocated_timetable(::timetable_msg_t* timetable) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete timetable_;
+  }
+  if (timetable) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(timetable);
+    if (message_arena != submessage_arena) {
+      timetable = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, timetable, submessage_arena);
+    }
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  timetable_ = timetable;
+  // @@protoc_insertion_point(field_set_allocated:application_msg_t.timetable)
 }
 
 // repeated .transaction_msg_t log = 3;
@@ -727,6 +946,8 @@ application_msg_t::log() const {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 
