@@ -1,16 +1,77 @@
+#include <string>
+#include <vector>
+#include <iostream>
+#include <sstream>
 #include "client.h"
 #include "parameters.h"
 #include "utility.h"
 
+#define TRANSFER_ARGS_NUM 2
+#define MESSAGE_ARGS_NUM 1
+#define BALANCE_ARGS_NUM 0
+
+const char* usage = "Run the program by typing ./client <cid> where cid is within range [0, 2].";
+
+inline void print_usage() {
+    printf("%s\n", usage);
+}
+
 int main(int argc, char** argv) {
 
     if (argc != 2) {
-        std::cerr << "Please input the current client id." << std::endl;
+        print_usage();
         exit(1);
     }
 
     int cid = atoi(argv[1]);
+    if (cid < 0 || cid > 2) {
+        std::cout << "Your input cid is out of the accepted range." << std::endl;
+        print_usage();
+        exit(1);
+    }
     client c(cid);
-    while(true);
+
+    std::string input;
+    while(true) {
+        input.clear();
+        std::getline(std::cin, input);
+        std::stringstream ss(input);
+        std::vector<std::string> args;
+        while (ss.good()) {
+            std::string arg = "";
+            ss >> arg;
+            args.push_back(arg);
+        }
+        
+        std::string &cmd = args[0];
+        if (cmd.compare("t") == 0 || cmd.compare("transfer") == 0) 
+        {
+            if (args.size() != TRANSFER_ARGS_NUM + 1) {
+                std::cout << "Transfer command format is not correct." << std::endl;
+                continue;
+            }
+            int recv_id = atoi(args[1].c_str());
+            float amount = (float)atof(args[2].c_str());
+
+            // Call the transfer transaction method.
+            int status = c.transfer_money(recv_id, amount);
+            switch (status) {
+                case INSUFFICIENT_BALANCE_ERROR:
+                    std::cout << "[main] Insufficient balance!" << std::endl;
+                    break;
+                case ILLEGAL_SENDER_ERROR:
+                    std::cout << "[main] Illegal sender!" << std::endl;
+                    break;
+                case ILLEGAL_RECVER_ERROR:
+                    std::cout << "[main] You cannot send money to your self!" << std::endl;
+                    break;
+                default:
+                    std::cout << "[main] Successfully transferred" << std::endl; 
+                    
+            }
+        }
+
+    }
+
     return 0;
 }
