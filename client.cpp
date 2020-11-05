@@ -159,6 +159,7 @@ int client::transfer_money(uint32_t rid, float amt) {
     transaction_t newtrans = transaction_t(client_id, rid, amt, get_clocktime());
     add_to_blockchain(newtrans);
     set_balance(client_id, get_balance(client_id) - amt);
+    set_balance(rid, get_balance(rid) + amt);
     set_timetable(client_id, client_id, clocktime);
     return 0;
 }
@@ -409,8 +410,9 @@ void client::proc_application() {
         // Incorporate all new transactions into local blockchain
         for (auto t : trans_log) {                                              
             if (t.clock > get_timetable(client_id, t.sender_id)) {              // REVIEW: Only add to the local queue when this client doesn't know the sender's event.
-                add_to_blockchain(t);                                           
-                set_balance(t.recver_id, t.amt);                                // REVIEW: Set balance.
+                add_to_blockchain(t);
+                set_balance(t.sender_id, get_balance(t.sender_id) - t.amt);                                           
+                set_balance(t.recver_id, get_balance(t.recver_id) + t.amt);       // REVIEW: Set balance.
             }
         }
 
