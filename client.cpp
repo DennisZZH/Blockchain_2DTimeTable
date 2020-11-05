@@ -73,6 +73,11 @@ u_int32_t client::get_timetable(uint32_t j, uint32_t k) {
     return curr_t;
 }
 
+/**
+ * @brief Deprecated function. Replaced by get_timetable_msg();
+ * 
+ * @return std::string 
+ */
 std::string client::get_timetable_str(){
     std::string timetable_str = "";
     timetable_mutex.lock();
@@ -83,6 +88,11 @@ std::string client::get_timetable_str(){
     return timetable_str;
 }
 
+/**
+ * @brief Pass in a pointer of the timetable object and this function will help you fill the current timetable data.
+ * 
+ * @param timetable_msg a pointer of the timetable_msg_t object.
+ */
 void client::get_timetable_msg(timetable_msg_t* timetable_msg) {
     timetable_mutex.lock();
     for (int i = 0; i < TIME_TABLE_SIZE; i++) {
@@ -387,19 +397,21 @@ void client::proc_application() {
         
         // Update timetable.
         for (int i = 0; i < TIME_TABLE_SIZE; i++) {
-            timetable_recv[i] = curr_application.timetable().time(i);       // REVIEW: Timetable string [i] - '0'. Always valid?
+            timetable_recv[i] = curr_application.timetable().time(i);       
         }
         
         // Parse the transactions_log
         std::vector<transaction_t> trans_log;
-        for (int i = 0; i < curr_application.log_size(); i++) {             // REVIEW: Logsize 
+        for (int i = 0; i < curr_application.log_size(); i++) {             
             const transaction_msg_t& tran_msg = curr_application.log(i);
             trans_log.push_back(transaction_t(tran_msg.sender_id(), tran_msg.recver_id(), tran_msg.amt(), tran_msg.clock()));
         }
         // Incorporate all new transactions into local blockchain
-        for (auto t : trans_log) {                                          // TODO:    Compare with timetable. Qualified transactions to blockchain.
-                                                                            // TODO:    Update local balance table.
-            add_to_blockchain(t);                                           // REVIEW:  Why add directly? What if the sender doesn't know that you already know, and send the same thing again?
+        for (auto t : trans_log) {                                              
+            if (t.clock > get_timetable(client_id, t.sender_id)) {              // REVIEW: Only add to the local queue when this client doesn't know the sender's event.
+                add_to_blockchain(t);                                           
+                set_balance(t.recver_id, t.amt);                                // REVIEW: Set balance.
+            }
         }
 
         // Update Timetable so that, (1) Max of all elemets (2) Max of clocktimes in local ith row and remote kth row
@@ -418,6 +430,7 @@ void client::proc_application() {
 }
 
 int client::garbage_collect() {
+    blockchain_mutex.lock();                                                    // REVIEW: Blockchain delete operation needs synchronization.
     for (auto it = blockchain.begin(); it != blockchain.end(); it++) {
         uint32_t sid = it->sender_id;
         uint32_t clock = it->clock;
@@ -432,5 +445,6 @@ int client::garbage_collect() {
             blockchain.erase(it);
         }
     }
+    blockchain_mutex.unlock();
     return 0;
 }
