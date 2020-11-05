@@ -8,7 +8,7 @@
 
 #define TRANSFER_ARGS_NUM 2
 #define MESSAGE_ARGS_NUM 1
-#define BALANCE_ARGS_NUM 0
+#define BALANCE_ARGS_NUM 1
 
 const char* usage = "Run the program by typing ./client <cid> where cid is within range [0, 2].";
 
@@ -57,18 +57,42 @@ int main(int argc, char** argv) {
             int status = c.transfer_money(recv_id, amount);
             switch (status) {
                 case INSUFFICIENT_BALANCE_ERROR:
-                    std::cout << "[main] Insufficient balance!" << std::endl;
-                    break;
-                case ILLEGAL_SENDER_ERROR:
-                    std::cout << "[main] Illegal sender!" << std::endl;
+                    std::cout << "[main] Incorrect: Insufficient balance!" << std::endl;
                     break;
                 case ILLEGAL_RECVER_ERROR:
-                    std::cout << "[main] You cannot send money to your self!" << std::endl;
+                    std::cout << "[main] Incorrect: You cannot send money to your self!" << std::endl;
                     break;
                 default:
-                    std::cout << "[main] Successfully transferred" << std::endl; 
+                    std::cout << "[main] Success!" << std::endl; 
                     
             }
+        }
+
+        else if (cmd.compare("m") == 0 || cmd.compare("message") == 0) {
+            if (args.size() != MESSAGE_ARGS_NUM + 1) {
+                std::cout << "Message command format is not correct." << std::endl;
+                continue;
+            }
+            int recv_id = atoi(args[1].c_str());
+            if (c.send_application(recv_id) < 0) {
+                std::cout << "[main] Incorrect: Fail to send application message!" << std::endl;
+            }
+            else {
+                std::cout << "[main] Success: Message sent to client #" << recv_id << std::endl;
+            }
+        }
+
+        else if (cmd.compare("b") == 0 || cmd.compare("balance") == 0) {
+            if (args.size() != BALANCE_ARGS_NUM + 1) {
+                std::cout << "Balance command format is not correct." << std::endl;
+                continue;
+            }
+            int client_id = atoi(args[1].c_str());
+            std::cout << "[main] Balance = " << c.check_balance(client_id) << std::endl;
+        }
+
+        else {
+            std::cout << "Wrong command, please input again!" << std::endl;
         }
 
     }

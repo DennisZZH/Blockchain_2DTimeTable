@@ -149,8 +149,8 @@ void client::push_msg_buffer(application_msg_t &app_msg) {
 }
 
 int client::transfer_money(uint32_t rid, float amt) {
-    if (rid != client_id) {
-        return ILLEGAL_SENDER_ERROR;
+    if (rid == client_id) {
+        return ILLEGAL_RECVER_ERROR;
     }
     if (get_balance(client_id) < amt) {
         return INSUFFICIENT_BALANCE_ERROR;
