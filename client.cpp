@@ -11,6 +11,7 @@
 #include "Msg.pb.h"
 #include "parameters.h"
 #include "utility.h"
+#include <sstream>
 
 client::client(uint32_t cid) {
     // Note: cid should be within 0 to 2
@@ -82,6 +83,14 @@ std::string client::get_timetable_str(){
     return timetable_str;
 }
 
+void client::get_timetable_msg(timetable_msg_t* timetable_msg) {
+    timetable_mutex.lock();
+    for (int i = 0; i < TIME_TABLE_SIZE; i++) {
+        timetable_msg->add_time(timetable[i]);
+    }
+    timetable_mutex.unlock();
+}
+
 void client::get_transactions(uint32_t target_clock, std::vector<transaction_t> &log) {
     // Get all transactions t such that Timetable[k, node(t)] < time(t)
     for (auto it = blockchain.begin(); it != blockchain.end(); it++) {
@@ -93,7 +102,7 @@ void client::get_transactions(uint32_t target_clock, std::vector<transaction_t> 
 
 application_msg_t client::pop_msg_buffer() {
     msg_buffer_mutex.lock();
-    application_msg_t tmp = msg_buffer.front();
+    application_msg_t tmp = msg_buffer.front();        
     msg_buffer.pop();
     msg_buffer_mutex.unlock();
     return tmp;
@@ -111,7 +120,7 @@ void client::set_timetable(uint32_t j, uint32_t k, uint32_t t) {
     timetable_mutex.unlock();
 }
 
-void client::increase_clocktime() {
+void client::increase_clocktime() {                                     // REVIEW: Should also increase timetable? Double check 132
     clocktime_mutex.lock();
     clocktime++;
     clocktime_mutex.unlock();
@@ -123,7 +132,7 @@ void client::add_to_blockchain(transaction_t &trans) {
     blockchain_mutex.unlock();
 }
 
-void client::push_msg_buffer(application_msg_t app_msg) {
+void client::push_msg_buffer(application_msg_t &app_msg) {
     msg_buffer_mutex.lock();
     msg_buffer.push(app_msg);
     msg_buffer_mutex.unlock();
@@ -145,17 +154,21 @@ int client::transfer_money(uint32_t rid, float amt) {
 }
 
 int client::send_application(uint32_t rid) {
-    // Piggyback Timetable into a string
-    std::string timetable_str = get_timetable_str();
     // Piggyback all transactions t such that Timetable[k, node(t)] < time(t)
     std::vector<transaction_t> trans_log;
     uint32_t target_clock = get_timetable(rid, client_id);
-    get_transactions(target_clock, trans_log);
+    get_transactions(target_clock, trans_log);                                  // REVIEW: Double check this function
+
     // Include all the info and create a application_msg_t
     application_msg_t new_application;
     transaction_msg_t* tran_ptr;
-    new_application.set_sender_id(rid);
-    new_application.set_timetable_str(timetable_str);
+    new_application.set_sender_id(client_id);
+
+    // Add the timetable into the application_msg
+    timetable_msg_t *timetable = new timetable_msg_t();
+    new_application.set_allocated_timetable(timetable);
+    get_timetable_msg(timetable);
+    
     for (auto t : trans_log) {
         tran_ptr = new_application.add_log();
         tran_ptr->set_sender_id(t.sender_id);
@@ -164,7 +177,26 @@ int client::send_application(uint32_t rid) {
         tran_ptr->set_clock(t.clock);
     }
     // Send out the application
-    // TODO
+    std::string message = new_application.SerializeAsString();
+    const char* message_str = message.c_str();
+    HEADER_TYPE transfer_size = htonl(new_application.ByteSizeLong());
+    uint8_t* transfer_str = new uint8_t[transfer_size + HEADER_SIZE];
+    memcpy(transfer_str, &transfer_size, HEADER_SIZE);
+    memcpy(transfer_str + HEADER_SIZE, message_str, strlen(message_str));
+
+    // DEBUG: Need to check if the byte size is the same as the strlen:
+    std::cout << "[send_application debug] byte count: " << new_application.ByteSizeLong() << std::endl;
+    std::cout << "[send_application debug] strlen: " << strlen(message_str) << std::endl;
+
+    if (!clients_connected[rid].valid) {
+        std::cerr << "[send_application] The connection to the receiver is lost. " << strlen(message_str) << std::endl;
+        delete [] transfer_str;
+        return -1;
+    }
+    
+    write(clients_connected[rid].socket, message_str, transfer_size + HEADER_SIZE);
+    delete [] transfer_str;
+    
     return 0;
 }
 
@@ -285,20 +317,51 @@ void client::recv_application(int id) {
     // Recv an application_msg_t
     // Push it into msg_buffer
     // Note: use Thread Safe method push_msg_buffer() to push into msg_buffer
-    // TODO
-    uint8_t buffer[4096] = {0};
     while (!stop_flag) {
         // Receive logic here.
         int sock = clients_connected[id].socket;
-        int size = read(sock, buffer, sizeof(buffer));
-        if (size <= 0) {
+        HEADER_TYPE receive_size = 0;
+        
+        // Make sure the socket is still valid.
+        if (!clients_connected[id].valid)
             break;
-        }
+
+        int size = read(clients_connected[id].socket, &receive_size, HEADER_SIZE);
+        if (size <= 0) {
+            std::cout << "[recv_application] Connection is lost." << std::endl;
+            break;
+        } else if (size < HEADER_SIZE) {
+            std::cout << "[recv_application] Received broken header." << std::endl;
+            continue;
+        }   
+
+        // Parse the payload size in bytes
+        receive_size = ntohl(receive_size);
+        uint8_t *message = new uint8_t[receive_size];
+        
+        size = read(clients_connected[id].socket, message, receive_size);
+        if (size <= 0) {
+            std::cout << "[recv_application] Connection is lost." << std::endl;
+            delete [] message;
+            break;
+        } else if (size < receive_size) {
+            std::cout << "[recv_application] Received broken body." << std::endl;
+            delete [] message;
+            continue;
+        } 
+
+        // Start parsing the message.
+        application_msg_t application_message;
+        application_message.ParseFromArray(message, receive_size);
+        delete [] message;
+        
+        push_msg_buffer(application_message);
+        std::cout << "[recv_application] Received app and saved." << std::endl;
     }
     // If this thread stops for any reason.
     // Need to free the client socket.
     // close(clients_connected[id].socket);  // May not need this.
-    std::cout << "[recv] client: " << id << " is exiting." << std::endl;
+    std::cout << "[recv_application] client: " << id << " is exiting." << std::endl;
     close(clients_connected[id].socket);
     clients_connected[id].valid = false;
     // Don't need to deal with the thread here, after this function, the thread will quit.
@@ -307,28 +370,43 @@ void client::recv_application(int id) {
 void client::proc_application() {
     while (!stop_flag) {
         // Pop an application from msg_buffer
+        if (msg_buffer.size() == 0) {
+            // If the message buffer is empty, then don't pop.
+            continue;
+        }
         application_msg_t curr_application = pop_msg_buffer();
+
         // Get the Timetable and transactions from that application
         uint32_t sid = curr_application.sender_id();
-        std::string timetable_str = curr_application.timetable_str();
         uint32_t timetable_recv[TIME_TABLE_SIZE];
-        for (int i = 0; i < TIME_TABLE_SIZE; i++) {
-            timetable_recv[i] = timetable_str[i] - '0';
+
+        if (curr_application.timetable().time_size() != TIME_TABLE_SIZE) {
+            std::cerr << "[proc_application] Application contains invalid timetable info." << std::endl;
+            continue;
         }
+        
+        // Update timetable.
+        for (int i = 0; i < TIME_TABLE_SIZE; i++) {
+            timetable_recv[i] = curr_application.timetable().time(i);       // REVIEW: Timetable string [i] - '0'. Always valid?
+        }
+        
+        // Parse the transactions_log
         std::vector<transaction_t> trans_log;
-        for (int i = 0; i < curr_application.log_size(); i++) {
+        for (int i = 0; i < curr_application.log_size(); i++) {             // REVIEW: Logsize 
             const transaction_msg_t& tran_msg = curr_application.log(i);
             trans_log.push_back(transaction_t(tran_msg.sender_id(), tran_msg.recver_id(), tran_msg.amt(), tran_msg.clock()));
         }
         // Incorporate all new transactions into local blockchain
-        for (auto t : trans_log) {
-            add_to_blockchain(t);
+        for (auto t : trans_log) {                                          // TODO:    Compare with timetable. Qualified transactions to blockchain.
+                                                                            // TODO:    Update local balance table.
+            add_to_blockchain(t);                                           // REVIEW:  Why add directly? What if the sender doesn't know that you already know, and send the same thing again?
         }
+
         // Update Timetable so that, (1) Max of all elemets (2) Max of clocktimes in local ith row and remote kth row
         for (int row = 0; row < MAX_CLIENT_SIZE; row++) {
             for (int col = 0; col < MAX_CLIENT_SIZE; col++) {
                 if (row == client_id) {
-                    set_timetable(row, col, std::max(get_timetable(row, col), timetable_recv[sid * MAX_CLIENT_SIZE + col]));
+                    set_timetable(row, col, std::max(get_timetable(row, col), timetable_recv[sid * MAX_CLIENT_SIZE + col]));    // REVIEW: Double Check.
                 }
                 set_timetable(row, col, std::max(get_timetable(row, col), timetable_recv[row * MAX_CLIENT_SIZE + col]));
             }

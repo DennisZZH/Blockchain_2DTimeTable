@@ -7,6 +7,12 @@
 #define COMM_DELAY_MAX      5
 
 /**
+ * @brief Communication format: [Bytes to transfer][Payload managed by protobuf]
+ */
+#define HEADER_TYPE     uint32_t
+#define HEADER_SIZE     sizeof(HEADER_TYPE)
+
+/**
  *  Communication related parameters
  */
 #define CLIENT_IP           "127.0.0.1"

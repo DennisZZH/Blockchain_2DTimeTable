@@ -7,8 +7,12 @@ message transaction_msg_t {
 	required uint32 clock = 4;
 }
 
+message timetable_msg_t {
+	repeated uint32 time = 1;
+}
+
 message application_msg_t {
 	required int32 sender_id = 1;
-	required string timetable_str = 2;
+	required timetable_msg_t timetable = 2;
 	repeated transaction_msg_t log = 3;
 }

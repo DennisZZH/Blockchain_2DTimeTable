@@ -59,6 +59,7 @@ private:
     // Thread safe Getter helper functions
     float get_balance(uint32_t cid);
     u_int32_t get_timetable(uint32_t j, uint32_t k);
+    void get_timetable_msg(timetable_msg_t* timetable_msg);
     std::string get_timetable_str();
     uint32_t get_clocktime() {return clocktime;};
     void get_transactions(uint32_t target_clock, std::vector<transaction_t> &log);  // Get qualified transactions
@@ -69,7 +70,7 @@ private:
     void set_timetable(uint32_t j, uint32_t k, uint32_t t);
     void increase_clocktime();                          // Increase its own clocktime by 1
     void add_to_blockchain(transaction_t &trans);       // Add a transaction to blockchain
-    void push_msg_buffer(application_msg_t app_msg);    // Push a application msg to msg_buffer
+    void push_msg_buffer(application_msg_t &app_msg);    // Push a application msg to msg_buffer
 
     int garbage_collect();
     int setup_server();                    // Setup the socket and ready to accept socket.
@@ -89,7 +90,7 @@ private:
     std::thread proc_thread;                    // Thread for precessing recved application from peers                              
 
     // Thread Tasks
-    void setup_connections();               // Setup the connections to connect to other clients.
+    void setup_connections();                   // Setup the connections to connect to other clients.
     void wait_connections();                    // Thread function for listening & accepting connections. 
     void proc_application();                    // Thread functon for processing applications recved from peers
     void recv_application(int index);           // Thread function for recving applications from peers. Index is used for freeing the client slot.
