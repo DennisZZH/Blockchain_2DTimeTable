@@ -91,6 +91,12 @@ int main(int argc, char** argv) {
             std::cout << "[main] Balance = " << c.check_balance(client_id) << std::endl;
         }
 
+        else if (cmd.compare("d") == 0 || cmd.compare("debug") == 0) { 
+            std::cout<<c.get_blockchain_str()<<std::endl;
+            std::cout<<c.get_timetable_str()<<std::endl;
+            std::cout<<c.get_balance_table()<<std::endl;
+        }
+
         else {
             std::cout << "Wrong command, please input again!" << std::endl;
         }

@@ -79,13 +79,45 @@ u_int32_t client::get_timetable(uint32_t j, uint32_t k) {
  * @return std::string 
  */
 std::string client::get_timetable_str(){
-    std::string timetable_str = "";
+    std::string row_div = "------------";
+    std::stringstream ss;
     timetable_mutex.lock();
-    for (int i = 0; i < TIME_TABLE_SIZE; i++) {
-        timetable_str += timetable[i];
+
+    for (int row = 0; row < MAX_CLIENT_SIZE; row++) {
+        ss << row_div << std::endl;
+        for (int col = 0; col < MAX_CLIENT_SIZE; col++) { 
+            ss << "| " << timetable[row * MAX_CLIENT_SIZE + col];
+        }
+        ss << std::endl;
     }
+    ss << row_div << std::endl;  
+
     timetable_mutex.unlock();
-    return timetable_str;
+    return ss.str();
+}
+
+std::string client::get_blockchain_str() {
+    std::string blockchain_str = "", transaction_str = "";
+    for (auto it = blockchain.begin(); it != blockchain.end(); it++) {
+        transaction_str += " <" + std::to_string(it->sender_id) + ", " + std::to_string(it->recver_id) + ", " + std::to_string(it->amt) + ", " + std::to_string(it->clock) + "> ";
+        blockchain_str += transaction_str;
+        transaction_str.clear();
+    }
+    return blockchain_str;
+}
+
+std::string client::get_balance_table() {
+    std::string row_div = "------------";
+    std::stringstream ss;
+    balance_table_mutex.lock();
+
+    for (int c = 0; c < MAX_CLIENT_SIZE; c++) { 
+        ss << "| " << balance_table[c];
+    }
+    ss << std::endl; 
+
+    balance_table_mutex.unlock();
+    return ss.str();
 }
 
 /**
@@ -101,10 +133,10 @@ void client::get_timetable_msg(timetable_msg_t* timetable_msg) {
     timetable_mutex.unlock();
 }
 
-void client::get_transactions(uint32_t target_clock, std::vector<transaction_t> &log) {
+void client::get_transactions(uint32_t rid, std::vector<transaction_t> &log) {
     // Get all transactions t such that Timetable[k, node(t)] < time(t)
     for (auto it = blockchain.begin(); it != blockchain.end(); it++) {
-        if (it->clock > target_clock) {
+        if (get_timetable(rid, it->sender_id) < it->clock) {
             log.push_back(*it);
         }
     }
@@ -167,8 +199,8 @@ int client::transfer_money(uint32_t rid, float amt) {
 int client::send_application(uint32_t rid) {
     // Piggyback all transactions t such that Timetable[k, node(t)] < time(t)
     std::vector<transaction_t> trans_log;
-    uint32_t target_clock = get_timetable(rid, client_id);
-    get_transactions(target_clock, trans_log);                                  // REVIEW: Double check this function
+    // uint32_t target_clock = get_timetable(rid, client_id);
+    get_transactions(rid, trans_log);                                  // REVIEW: Double check this function
 
     // Include all the info and create a application_msg_t
     application_msg_t new_application;
@@ -190,23 +222,26 @@ int client::send_application(uint32_t rid) {
     // Send out the application
     std::string message = new_application.SerializeAsString();
     const char* message_str = message.c_str();
-    HEADER_TYPE transfer_size = htonl(new_application.ByteSizeLong());
-    uint8_t* transfer_str = new uint8_t[transfer_size + HEADER_SIZE];
-    memcpy(transfer_str, &transfer_size, HEADER_SIZE);
-    memcpy(transfer_str + HEADER_SIZE, message_str, strlen(message_str));
+    //HEADER_TYPE transfer_size = htonl(new_application.ByteSizeLong());
+    uint32_t transfer_size = new_application.ByteSizeLong();
+    HEADER_TYPE transfer_size_header = htonl(transfer_size);
+    // uint8_t* transfer_str = new uint8_t[transfer_size + HEADER_SIZE];
+    // memcpy(transfer_str, &transfer_size, HEADER_SIZE);
+    // memcpy(transfer_str + HEADER_SIZE, message_str, strlen(message_str));
 
     // DEBUG: Need to check if the byte size is the same as the strlen:
-    std::cout << "[send_application debug] byte count: " << new_application.ByteSizeLong() << std::endl;
-    std::cout << "[send_application debug] strlen: " << strlen(message_str) << std::endl;
+    // std::cout << "[send_application debug] byte count: " << new_application.ByteSizeLong() << std::endl;
+    // std::cout << "[send_application debug] strlen: " << strlen(message_str) << std::endl;
 
     if (!clients_connected[rid].valid) {
         std::cerr << "[send_application] The connection to the receiver is lost. " << strlen(message_str) << std::endl;
-        delete [] transfer_str;
+        //delete [] transfer_str;
         return -1;
     }
     
-    write(clients_connected[rid].socket, message_str, transfer_size + HEADER_SIZE);
-    delete [] transfer_str;
+    write(clients_connected[rid].socket, &transfer_size_header, HEADER_SIZE);
+    write(clients_connected[rid].socket, message_str, transfer_size);
+    //delete [] transfer_str;
     
     return 0;
 }
@@ -338,6 +373,7 @@ void client::recv_application(int id) {
             break;
 
         int size = read(clients_connected[id].socket, &receive_size, HEADER_SIZE);
+        // std::cout<<"[recv_application] header size read = "<<size<<std::endl;
         if (size <= 0) {
             std::cout << "[recv_application] Connection is lost." << std::endl;
             break;
@@ -348,9 +384,13 @@ void client::recv_application(int id) {
 
         // Parse the payload size in bytes
         receive_size = ntohl(receive_size);
+
+        // std::cout<<"[recv_application] body size = "<<receive_size<<std::endl;
+
         uint8_t *message = new uint8_t[receive_size];
         
         size = read(clients_connected[id].socket, message, receive_size);
+        // std::cout<<"[recv_application] body size read = "<<size<<std::endl;
         if (size <= 0) {
             std::cout << "[recv_application] Connection is lost." << std::endl;
             delete [] message;
