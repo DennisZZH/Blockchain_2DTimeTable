@@ -53,6 +53,10 @@ int main(int argc, char** argv) {
             int recv_id = atoi(args[1].c_str());
             float amount = (float)atof(args[2].c_str());
 
+            if (recv_id < 0 || recv_id > 2) {
+                std::cout << "[main] Invalid recv_id. Please make sure the id is from 0 to 2." << std::endl;
+                continue;
+            }
             // Call the transfer transaction method.
             int status = c.transfer_money(recv_id, amount);
             switch (status) {
@@ -74,7 +78,10 @@ int main(int argc, char** argv) {
                 continue;
             }
             int recv_id = atoi(args[1].c_str());
-            if (c.send_application(recv_id) < 0) {
+            if (recv_id < 0 || recv_id > 2) {
+                std::cout << "[main] Invalid recv_id. Please make sure the id is from 0 to 2." << std::endl;
+            }
+            else if (c.send_application(recv_id) < 0) {
                 std::cout << "[main] Incorrect: Fail to send application message!" << std::endl;
             }
             else {
@@ -88,7 +95,11 @@ int main(int argc, char** argv) {
                 continue;
             }
             int client_id = atoi(args[1].c_str());
-            std::cout << "[main] Balance = " << c.check_balance(client_id) << std::endl;
+            if (client_id < 0 || client_id > 2) {
+                std::cout << "[main] Invalid recv_id. Please make sure the id is from 0 to 2." << std::endl;
+            } else {
+                std::cout << "[main] Balance = " << c.check_balance(client_id) << std::endl;
+            }
         }
 
         else if (cmd.compare("d") == 0 || cmd.compare("debug") == 0) { 

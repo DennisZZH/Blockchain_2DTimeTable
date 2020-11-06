@@ -6,6 +6,7 @@
 #include <vector>
 #include <list>
 #include <queue>
+#include <ios>
 #include <algorithm>
 #include "client.h"
 #include "Msg.pb.h"
@@ -82,11 +83,11 @@ std::string client::get_timetable_str(){
     std::string row_div = "------------";
     std::stringstream ss;
     timetable_mutex.lock();
-
+    ss << "Time Table: " << std::endl;
     for (int row = 0; row < MAX_CLIENT_SIZE; row++) {
         ss << row_div << std::endl;
         for (int col = 0; col < MAX_CLIENT_SIZE; col++) { 
-            ss << "| " << timetable[row * MAX_CLIENT_SIZE + col];
+            ss << " | " << timetable[row * MAX_CLIENT_SIZE + col];
         }
         ss << std::endl;
     }
@@ -97,22 +98,29 @@ std::string client::get_timetable_str(){
 }
 
 std::string client::get_blockchain_str() {
-    std::string blockchain_str = "", transaction_str = "";
+    std::stringstream ss;
+    ss.setf(std::ios::fixed, std::ios::floatfield);
+    ss.precision(2);
+    ss << "Balance Table:" << std::endl;
     for (auto it = blockchain.begin(); it != blockchain.end(); it++) {
-        transaction_str += " <" + std::to_string(it->sender_id) + ", " + std::to_string(it->recver_id) + ", " + std::to_string(it->amt) + ", " + std::to_string(it->clock) + "> ";
-        blockchain_str += transaction_str;
-        transaction_str.clear();
+        ss << "<" << it->sender_id << ", " << it->recver_id << ", " << it->amt << ", " << it->clock << ">";
+        if (std::next(it) != blockchain.end()) {
+            ss << " -> ";
+        }
     }
-    return blockchain_str;
+    ss << std::endl;
+    return ss.str();
 }
 
 std::string client::get_balance_table() {
     std::string row_div = "------------";
     std::stringstream ss;
+    ss.setf(std::ios::fixed, std::ios::floatfield);
+    ss.precision(2);
     balance_table_mutex.lock();
-
+    ss << "Balance Table: " << std::endl;
     for (int c = 0; c < MAX_CLIENT_SIZE; c++) { 
-        ss << "| " << balance_table[c];
+        ss << " | " << balance_table[c];
     }
     ss << std::endl; 
 
