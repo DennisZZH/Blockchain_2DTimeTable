@@ -101,7 +101,7 @@ std::string client::get_blockchain_str() {
     std::stringstream ss;
     ss.setf(std::ios::fixed, std::ios::floatfield);
     ss.precision(2);
-    ss << "Balance Table:" << std::endl;
+    ss << "Blockchain:" << std::endl;
     for (auto it = blockchain.begin(); it != blockchain.end(); it++) {
         ss << "<" << it->sender_id << ", " << it->recver_id << ", " << it->amt << ", " << it->clock << ">";
         if (std::next(it) != blockchain.end()) {
