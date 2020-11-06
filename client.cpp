@@ -247,6 +247,7 @@ int client::send_application(uint32_t rid) {
         return -1;
     }
     
+    std::this_thread::sleep_for(std::chrono::seconds(COMM_DELAY_MAX));
     write(clients_connected[rid].socket, &transfer_size_header, HEADER_SIZE);
     write(clients_connected[rid].socket, message_str, transfer_size);
     //delete [] transfer_str;
